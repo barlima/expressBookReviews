@@ -36,44 +36,64 @@ public_users.get("/", async function (req, res) {
 });
 
 // Get book details based on ISBN
-public_users.get("/isbn/:isbn", function (req, res) {
-  const book = books[req.params.isbn];
+public_users.get("/isbn/:isbn", async function (req, res) {
+  try {
+    const response = await axios.get("http://localhost:8080/books.json");
+    const book = response.data[req.params.isbn];
 
-  if (!book) {
-    return res.status(404).json({ message: "Book not found" });
+    if (!book) {
+      return res.status(404).json({ message: "Book not found" });
+    }
+
+    return res.json(book);
+  } catch (error) {
+    console.error("Error fetching book:", error);
+    return res.status(500).json({ message: "Error fetching book" });
   }
-
-  return res.json(book);
 });
 
 // Get book details based on author
-public_users.get("/author/:author", function (req, res) {
-  const author = req.params.author;
+public_users.get("/author/:author", async function (req, res) {
+  try {
+    const response = await axios.get("http://localhost:8080/books.json");
+    const author = req.params.author;
 
-  const booksByAuthor = Object.values(books).filter(
-    (book) => book.author === author
-  );
+    const booksByAuthor = Object.values(response.data).filter(
+      (book) => book.author === author
+    );
 
-  if (booksByAuthor.length === 0) {
-    return res.status(404).json({ message: "No books found for this author" });
+    if (booksByAuthor.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No books found for this author" });
+    }
+
+    return res.json(booksByAuthor);
+  } catch (error) {
+    console.error("Error fetching books by author:", error);
+    return res.status(500).json({ message: "Error fetching books by author" });
   }
-
-  return res.json(booksByAuthor);
 });
 
 // Get all books based on title
-public_users.get("/title/:title", function (req, res) {
-  const title = req.params.title;
+public_users.get("/title/:title", async function (req, res) {
+  try {
+    const response = await axios.get("http://localhost:8080/books.json");
+    const title = req.params.title;
 
-  const booksByTitle = Object.values(books).filter(
-    (book) => book.title === title
-  );
+    const booksByTitle = Object.values(response.data).filter(
+      (book) => book.title === title
+    );
 
-  if (booksByTitle.length === 0) {
-    return res.status(404).json({ message: "No books found for this title" });
+    if (booksByTitle.length === 0) {
+      return res.status(404).json({ message: "No books found for this title" });
+    }
+
+    return res.json(booksByTitle);
+  } catch (error) {
+    console.error("Error fetching books by title:", error);
+    return res.status(500).json({ message: "Error fetching books by title" });
   }
-
-  return res.json(booksByTitle);
 });
 
 //  Get book review
